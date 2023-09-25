@@ -1,20 +1,25 @@
 import { NextResponse } from "next/server";
-import clientPromise from "@/lib/mongodb"
 import { ObjectId } from "mongodb";
 import db from "../../../../lib/mongodb.js"
+import Post from "@/models/Post.js";
+import { POST } from "../route.js";
 
 
-export const GET = async (request, {params}) => {
-    const { id } = params;
-    await db.connect()
-    try {
+export const GET = async (request, { params }) => {
+  const { id } = params;
 
-      const post = await db.collection("post").findById({ _id: new ObjectId(id) });
+  try {
+    await db.connect();
 
+    const post = await Post.findById(id);
 
-      return new NextResponse(JSON.stringify(post), { status: 200 });
-    } catch (error) {
-      console.error(error);
-      return new NextResponse("Database Error", { status: 500 });
+    if (!post) {
+      return new NextResponse("User not found", { status: 404 });
     }
-}
+
+    return new NextResponse(JSON.stringify(post), { status: 200 });
+  } catch (error) {
+    console.error(error);
+    return new NextResponse("Database Error", { status: 500 });
+  }
+};
