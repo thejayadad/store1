@@ -1,78 +1,81 @@
 'use client'
-import { useState } from "react";
-import axios from "axios";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
-const CreatePost = () => {
-    const session = useSession();
-    const router = useRouter();
+export default function CreatePost() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
+  const [title, setTitle] = useState('')
+  const [content, setContent] = useState('')
+  const [img, setImg] = useState('')
+  const handleSubmit = async (e) => {
+    e.preventDefault()
 
-    const [formData, setFormData] = useState({
-      title: "",
-      img: "",
-      content: "",
-    });
+    if(!img || !title || !content){
+        console.log("All fields are required")
+        return
+    }
 
+    try {
 
-    const handleInputChange = (e) => {
-      const { name, value } = e.target;
-      setFormData({ ...formData, [name]: value });
-    };
+      const res = await fetch(`http://localhost:3000/api/post`, {
+        headers: {
+           'Content-Type': 'application/json',
+           'Authorization': `Bearer ${session?.user}`
+        },
+        method: 'POST',
+        body: JSON.stringify({title,content,img,username: session.user.name})
+      })
 
-    const handleSubmit = async (e) => {
-      e.preventDefault();
-
-      try {
-        const newPost = {
-          ...formData,
-          username: session.user.name,
-        };
-
-        await axios.post("/api/post", newPost);
-
-        router.push("/");
-      } catch (error) {
-        console.error("Error creating post:", error);
+      if(!res.ok){
+        throw new Error("Error occured")
       }
-    };
-  return (
-    <div>
-    <h1>Create a New Post</h1>
-    <form onSubmit={handleSubmit}>
-      <div>
-        <label>Title:</label>
-        <input
-          type="text"
-          name="title"
-          value={formData.title}
-          onChange={handleInputChange}
-          required
-        />
-      </div>
-      <div>
-        <label>Image URL:</label>
-        <input
-          type="text"
-          name="img"
-          value={formData.img}
-          onChange={handleInputChange}
-          required
-        />
-      </div>
-      <div>
-        <label>Content:</label>
-        <textarea
-          name="content"
-          value={formData.content}
-          onChange={handleInputChange}
-          required
-        />
-      </div>
-      <button type="submit">Create Post</button>
-    </form>
-  </div>
-  )
+
+      const post = await res.json()
+
+      router.push(`/`)
+    } catch (error) {
+        console.log(error)
+    }
 }
 
-export default CreatePost
+  if (status === "loading") {
+    return <p>Loading...</p>;
+  }
+
+  return (
+    <div>
+      <h1>Create a New Post</h1>
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label>Title:</label>
+          <input
+            type="text"
+            name="title"
+            onChange={(e) => setTitle(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>Image URL:</label>
+          <input
+            type="text"
+            name="img"
+            onChange={(e) => setImg(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>Content:</label>
+          <textarea
+            name="content"
+            onChange={(e) => setContent(e.target.value)}
+            required
+          />
+        </div>
+        <button type="submit">Create Post</button>
+      </form>
+    </div>
+  );
+}
