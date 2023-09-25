@@ -1,6 +1,7 @@
 import AuthProvider from '@/SessionProvider'
 import './globals.css'
 import { Inter } from 'next/font/google'
+import Component from '@/components/Navbar'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -14,7 +15,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body>
       <AuthProvider>
-
+      <Component />
       {children}
 
       </AuthProvider>
