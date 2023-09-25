@@ -1,32 +1,21 @@
 import { NextResponse } from "next/server";
-import clientPromise from "@/lib/mongodb"
 import { ObjectId } from "mongodb";
-
+import db from "@/lib/mongodb";
+import User from "@/models/User";
 
 
 export const GET = async (request, {params}) => {
     const { id } = params;
 
     try {
-      const client = await clientPromise;
-      const db = client.db();
+      await db.connect()
 
-      const user = await db.collection("users").findOne({ _id: new ObjectId(id) });
+      const user = await User.findById(id);
 
       if (!user) {
         return new NextResponse("User not found", { status: 404 });
       }
 
-      if (user.postIds && user.postIds.length > 0) {
-        const posts = await db
-          .collection("posts")
-          .find({ _id: { $in: user.postIds.map((postId) => new ObjectId(postId)) } })
-          .toArray();
-
-        user.posts = posts;
-      } else {
-        user.posts = [];
-      }
 
       return new NextResponse(JSON.stringify(user), { status: 200 });
     } catch (error) {

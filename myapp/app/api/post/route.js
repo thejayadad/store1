@@ -1,19 +1,18 @@
 import { NextResponse } from "next/server";
 import Post from "@/models/Post";
-import clientPromise from "@/lib/mongodb";
+import db from "@/lib/mongodb";
 
-export const GET = async (request, { params }) => {
-  try {
-    const client = await clientPromise;
-    const db = client.db();
-    const posts = await db.collection("post").find({})
+export const GET = async (request)=> {
+    try {
+      await db.connect()
 
-    return new NextResponse(JSON.stringify(posts), { status: 200 });
-  } catch (error) {
-    console.error(error);
-    return new NextResponse("Database Error", { status: 500 });
-  }
-};
+        const posts = await Post.find({})
+
+        return new NextResponse(JSON.stringify(posts), { status: 200 });
+      } catch (error) {
+        return new NextResponse("Database Error", { status: 500 });
+      }
+}
 
 
 export const POST = async (request) => {

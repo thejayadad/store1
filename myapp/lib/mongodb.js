@@ -1,24 +1,30 @@
-import { MongoClient } from "mongodb";
+import mongoose from 'mongoose';
 
-if (!process.env.MONGODB_URI) {
-  throw new Error('Invalid/Missing environment variable: "MONGODB_URI"');
+const connection = {};
+
+
+async function connect() {
+    if (connection.isConnected) {
+        return;
+    }
+    if (mongoose.connections.length > 0) {
+        connection.isConnected = mongoose.connections[0].readyState;
+        if (connection.isConnected === 1) {
+            return;
+        }
+        await mongoose.disconnect();
+    }
+    const db = await mongoose.connect(process.env.MONGODB_URI);
+    connection.isConnected = db.connections[0].readyState;
 }
 
-const uri = process.env.MONGODB_URI;
-const options = {};
-
-let client;
-let clientPromise
-
-if (process.env.NODE_ENV === "development") {
-  if (!global._mongoClientPromise) {
-    client = new MongoClient(uri, options);
-    global._mongoClientPromise = client.connect();
-  }
-  clientPromise = global._mongoClientPromise;
-} else {
-  client = new MongoClient(uri, options);
-  clientPromise = client.connect();
+async function disconnect() {
+    if (connection.isConnected) {
+        if (process.env.NODE_ENV === 'production') {
+            await mongoose.disconnect();
+            connection.isConnected = false;
+        }
+    }
 }
-
-export default clientPromise;
+const db = { connect, disconnect };
+export default db;

@@ -1,14 +1,13 @@
 import { NextResponse } from "next/server";
-import clientPromise from "@/lib/mongodb"
-
+import db from "../../../lib/mongodb.js"
+import User from "@/models/User.js";
 
 
 export const GET = async (request)=> {
     try {
-        const client = await clientPromise;
-        const db = client.db();
+      await db.connect()
 
-        const users = await db.collection("users").find({}).toArray();
+        const users = await User.find({})
 
         return new NextResponse(JSON.stringify(users), { status: 200 });
       } catch (error) {

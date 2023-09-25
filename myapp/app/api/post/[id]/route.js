@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb"
 import { ObjectId } from "mongodb";
+import db from "../../../../lib/mongodb.js"
+
 
 export const GET = async (request, {params}) => {
     const { id } = params;
-
+    await db.connect()
     try {
-      const client = await clientPromise;
-      const db = client.db();
 
       const post = await db.collection("post").findById({ _id: new ObjectId(id) });
 
