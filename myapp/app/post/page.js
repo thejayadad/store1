@@ -22,10 +22,10 @@ export default function CreatePost() {
       const res = await fetch(`http://localhost:3000/api/post`, {
         headers: {
            'Content-Type': 'application/json',
-           'Authorization': `Bearer ${session?.user}`
-        },
+           'Authorization': `Bearer ${session?.user?.email}`,
+          },
         method: 'POST',
-        body: JSON.stringify({title,content,img,username: session.user.name})
+        body: JSON.stringify({ title, content, img, username: session?.user?.email }),
       })
 
       if(!res.ok){

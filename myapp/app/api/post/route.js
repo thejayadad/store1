@@ -15,13 +15,13 @@ export const GET = async (request)=> {
 }
 
 
-export const POST = async (request) => {
-    const body = await request.json();
-    const newPost = new Post(body);
+export const POST = async (req) => {
+    await db.connect()
     try {
-        await db.connect()
-      await newPost.save();
-      return new NextResponse("Post has been created", { status: 201 });
+        const body = await req.json()
+        const newPost = await Post.create(body)
+        return new Response(JSON.stringify(newPost), { status: 201 })
+
     } catch (err) {
       console.error(err);
       return new NextResponse("Database Error", { status: 500 });
