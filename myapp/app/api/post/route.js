@@ -19,8 +19,7 @@ export const POST = async (request) => {
     const body = await request.json();
     const newPost = new Post(body);
     try {
-      const client = await clientPromise;
-      const db = client.db();
+        await db.connect()
       await newPost.save();
       return new NextResponse("Post has been created", { status: 201 });
     } catch (err) {
