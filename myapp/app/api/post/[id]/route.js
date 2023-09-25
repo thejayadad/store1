@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
-import { ObjectId } from "mongodb";
 import db from "../../../../lib/mongodb.js"
 import Post from "@/models/Post.js";
-import { POST } from "../route.js";
+
 
 
 export const GET = async (request, { params }) => {
